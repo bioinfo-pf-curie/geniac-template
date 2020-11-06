@@ -1,0 +1,3 @@
+[submodule "geniac"]
+	path = geniac
+	url = https://github.com/bioinfo-pf-curie/geniac.git
