@@ -28,7 +28,7 @@ This script is based on the nf-core guidelines. See https://nf-co.re/ for more i
 */
 
 // File with text to display when a developement version is used
-devMessageFile = file("$baseDir/assets/devMessage.txt")
+devMessageFile = file("$projectDir/assets/devMessage.txt")
 
 def helpMessage() {
   if ("${workflow.manifest.version}" =~ /dev/ ){
@@ -60,8 +60,8 @@ def helpMessage() {
   Other options:
     --outDir [file]               The output directory where the results will be saved
     -name [str]                   Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic
- 
-  =======================================================
+
+  ======================================================================
   Available Profiles
 
     -profile test                Set up the test dataset
@@ -113,8 +113,7 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 
 // Stage config files
 multiqcConfigCh = Channel.fromPath(params.multiqcConfig)
-outputDocsCh = file("$baseDir/docs/output.md", checkIfExists: true)
-outputDocsImagesCh = file("$baseDir/docs/images/", checkIfExists: true)
+outputDocsCh = file("$projectDir/docs/output.md", checkIfExists: true)
 
 /************
  * CHANNELS *
@@ -260,7 +259,7 @@ summary['Working dir']    = workflow.workDir
 summary['Output dir']     = params.outDir
 summary['Config Profile'] = workflow.profile
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
-log.info "========================================="
+log.info "======================================================="
 
 // ADD YOUR NEXTFLOW PROCESS HERE
 
@@ -323,6 +322,7 @@ process getSoftwareVersions{
  ********************/
 
 process workflowSummaryMqc {
+  label 'onlyLinux'
   when:
   !params.skipMultiQC
 
@@ -415,7 +415,6 @@ process outputDocumentation {
 
   input:
   file outputDocs from outputDocsCh
-  file images from outputDocsImagesCh
 
   output:
   file "resultsDescription.html"
@@ -452,12 +451,12 @@ workflow.onComplete {
 
   // Render the TXT template
   def engine = new groovy.text.GStringTemplateEngine()
-  def tf = new File("$baseDir/assets/workflowOnCompleteTemplate.txt")
+  def tf = new File("$projectDir/assets/workflowOnCompleteTemplate.txt")
   def txtTemplate = engine.createTemplate(tf).make(reportFields)
   def reportTxt = txtTemplate.toString()
 
   // Render the HTML template
-  def hf = new File("$baseDir/assets/workflowOnCompleteTemplate.html")
+  def hf = new File("$projectDir/assets/workflowOnCompleteTemplate.html")
   def htmlTemplate = engine.createTemplate(hf).make(reportFields)
   def reportHtml = htmlTemplate.toString()
 
